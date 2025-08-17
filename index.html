@@ -1,289 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rihan Trivia Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 15px;
       text-align: center;
-      max-width: 500px;
-      width: 100%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      background: #f0f0f0;
     }
-    h1 {
-      margin-bottom: 20px;
+    .quiz-container {
+      background: white;
+      width: 90%;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
     }
     button {
-      margin-top: 15px;
-      padding: 10px 20px;
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
       font-size: 16px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
+      background: #ddd;
       cursor: pointer;
-      background: #ff9800;
+      transition: 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background: #bbb;
+    }
+    .hidden { display: none; }
+    .progress-bar {
+      width: 100%;
+      background: #ddd;
+      border-radius: 8px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 12px;
+      width: 0%;
+      background: #4caf50;
+      transition: width 0.3s;
+    }
+    .timer {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #333;
+    }
+    .correctAnswer {
+      background: #4caf50 !important;
       color: white;
-      transition: transform 0.2s;
     }
-    button:hover {
-      transform: scale(1.05);
-      background: #ffa726;
-    }
-    .options {
-      margin-top: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .hidden {
-      display: none;
-    }
-    .score {
-      font-size: 20px;
-      margin-top: 20px;
-      animation: pop 0.5s ease-in-out;
+    .wrongAnswer {
+      background: #f44336 !important;
+      color: white;
     }
     @keyframes pop {
       0% { transform: scale(0.5); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-    #loading {
-      display: none;
-      font-size: 20px;
-      margin-top: 20px;
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-    #progress {
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    .progress-bar {
-      width: 100%;
-      background: rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      height: 12px;
-      margin-bottom: 15px;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ff9800, #ffc107);
-      transition: width 0.4s ease;
-    }
-    #timer {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-    /* Animations */
-    .correct {
-      animation: bounce 0.5s;
-    }
-    .wrong {
-      animation: shake 0.5s;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Rihan Trivia</h1>
-    <div id="progress" class="hidden"></div>
-    <div class="progress-bar hidden" id="progressBar">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div id="timer" class="hidden">⏳ 10s</div>
-    <div id="quiz">
-      <button id="startBtn">Start Game</button>
-    </div>
-    <div id="loading">Loading...</div>
-    <div id="result" class="hidden"></div>
+
+<div class="quiz-container">
+  <h1>Rihan Trivia 🎯</h1>
+  <div id="progressText"></div>
+  <div class="progress-bar hidden" id="progressBar">
+    <div class="progress-fill" id="progressFill"></div>
   </div>
+  <div class="timer hidden" id="timer"></div>
+  <div id="quiz"></div>
+  <div id="result" class="hidden"></div>
+</div>
 
-  <!-- Sounds -->
-  <audio id="correctSound" src="https://assets.mixkit.co/sfx/download/mixkit-correct-answer-tone-2870.wav"></audio>
-  <audio id="wrongSound" src="https://assets.mixkit.co/sfx/download/mixkit-wrong-answer-bass-buzzer-2869.wav"></audio>
-  <audio id="startSound" src="https://assets.mixkit.co/sfx/download/mixkit-video-game-mystery-alert-234.wav"></audio>
-  <audio id="endSound" src="https://assets.mixkit.co/sfx/download/mixkit-winning-chimes-2015.wav"></audio>
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d0f04.mp3?filename=correct-2-46134.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_64a83d.mp3?filename=wrong-47985.mp3"></audio>
+<audio id="endSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_21c47c.mp3?filename=game-over-arcade-6435.mp3"></audio>
 
-  <script>
-    const quizData = [
-      { q: "What is Rihan's favourite food?", a: "Porotta Beef", o: ["Porotta Beef", "Pizza", "Burger", "Shawarma"] },
-      { q: "What is Rihan's favourite place?", a: "Kuwait", o: ["Kuwait", "Dubai", "Maldives", "Qatar"] },
-      { q: "What is Rihan's favourite hobby?", a: "Gaming", o: ["Gaming", "Drawing", "Reading", "Traveling"] },
-      { q: "What is Rihan's favourite colour?", a: "Black", o: ["Black", "Blue", "Red", "Green"] },
-      { q: "What is Rihan's favourite sport?", a: "Football", o: ["Football", "Cricket", "Basketball", "Badminton"] },
-      { q: "What is Rihan's favourite movie genre?", a: "Sci-Fi", o: ["Sci-Fi", "Comedy", "Horror", "Drama"] },
-      { q: "What is Rihan's dream travel destination?", a: "Maldives", o: ["Maldives", "Paris", "New York", "London"] },
-      { q: "What is Rihan's favourite drink?", a: "Water", o: ["Water", "Juice", "Coffee", "Tea"] },
-      { q: "What device does Rihan use the most?", a: "Laptop", o: ["Laptop", "Phone", "Tablet", "Console"] },
-      { q: "What is Rihan's favourite time of day?", a: "Night", o: ["Night", "Morning", "Afternoon", "Evening"] },
-      { q: "What does Rihan want to become in the future?", a: "Scientist", o: ["Scientist", "Doctor", "Engineer", "Pilot"] },
-      { q: "What is Rihan's favourite ice cream flavour?", a: "Chocolate", o: ["Chocolate", "Vanilla", "Strawberry", "Mango"] },
-      { q: "What is Rihan's favourite school subject?", a: "Science", o: ["Science", "Maths", "English", "History"] },
-      { q: "What is Rihan's favourite video game genre?", a: "Shooting", o: ["Shooting", "Racing", "Puzzle", "Adventure"] },
-      { q: "Who is Rihan's favourite superhero?", a: "Iron Man", o: ["Iron Man", "Spider-Man", "Batman", "Superman"] },
-      { q: "What is Rihan's favourite music genre?", a: "Pop", o: ["Pop", "Rock", "Hip-Hop", "Classical"] },
-      { q: "What is Rihan's strongest skill?", a: "Silver-tongued", o: ["Silver-tongued", "Fast Learner", "Creative", "Hardworking"] },
-      { q: "What is Rihan most afraid of?", a: "His father and mother", o: ["Darkness", "His father and mother", "Heights", "Exams"] },
-      { q: "Which subject does Rihan find the hardest in school?", a: "No subject", o: ["Maths", "English", "Science", "No subject"] },
-      { q: "If Rihan could instantly learn one skill, what would it be?", a: "Manipulation", o: ["Manipulation", "Cooking", "Singing", "Drawing"] }
-    ];
+<script>
+const quizData = [
+  { question: "What is Rihan’s favorite color?", options: ["Blue", "Black", "Green", "Red"], answer: "Black" },
+  { question: "Which sport does Rihan like the most?", options: ["Cricket", "Football", "Basketball", "Hockey"], answer: "Football" },
+  { question: "Rihan’s favorite food?", options: ["Pizza", "Biryani", "Burger", "Pasta"], answer: "Biryani" },
+  // Add more questions here...
+];
 
-    let currentQuestion = 0;
-    let score = 0;
-    let streak = 0;
-    let shuffledQuestions = [];
-    let timer;
-    let timeLeft = 10;
+const quizContainer = document.getElementById("quiz");
+const resultContainer = document.getElementById("result");
+const progressText = document.getElementById("progressText");
+const progressBar = document.getElementById("progressBar");
+const progressFill = document.getElementById("progressFill");
+const timerElement = document.getElementById("timer");
 
-    const quizContainer = document.getElementById("quiz");
-    const resultContainer = document.getElementById("result");
-    const startBtn = document.getElementById("startBtn");
-    const loading = document.getElementById("loading");
-    const progressText = document.getElementById("progress");
-    const progressBar = document.getElementById("progressBar");
-    const progressFill = document.getElementById("progressFill");
-    const timerEl = document.getElementById("timer");
+let currentQuestion = 0;
+let score = 0;
+let streak = 0;
+let timer;
+let timeLeft = 10;
 
-    startBtn.addEventListener("click", startGame);
+function startGame() {
+  currentQuestion = 0;
+  score = 0;
+  streak = 0;
+  resultContainer.classList.add("hidden");
+  progressBar.classList.remove("hidden");
+  timerElement.classList.remove("hidden");
+  showQuestion();
+}
 
-    function startGame() {
-      document.getElementById("startSound").play();
-      currentQuestion = 0;
-      score = 0;
-      streak = 0;
-      shuffledQuestions = quizData.sort(() => Math.random() - 0.5);
+function showQuestion() {
+  clearInterval(timer);
 
-      quizContainer.classList.add("hidden");
-      loading.style.display = "block";
-      progressText.classList.add("hidden");
-      progressBar.classList.add("hidden");
-      timerEl.classList.add("hidden");
+  if (currentQuestion >= quizData.length) {
+    return endGame();
+  }
 
-      setTimeout(() => {
-        loading.style.display = "none";
-        quizContainer.classList.remove("hidden");
-        progressText.classList.remove("hidden");
-        progressBar.classList.remove("hidden");
-        timerEl.classList.remove("hidden");
-        showQuestion();
-      }, 2000);
-    }
+  let q = quizData[currentQuestion];
+  progressText.innerText = `Question ${currentQuestion + 1} of ${quizData.length}`;
+  progressFill.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
 
-    function startTimer() {
+  let optionsHTML = q.options.map(opt => 
+    `<button onclick="checkAnswer('${opt}','${q.answer}', this)">${opt}</button>`
+  ).join("");
+
+  quizContainer.innerHTML = `
+    <h2>${q.question}</h2>
+    <div class="options">${optionsHTML}</div>
+  `;
+
+  startTimer(q.answer);
+}
+
+function startTimer(correctAnswer) {
+  timeLeft = 10;
+  timerElement.innerText = `⏳ Time left: ${timeLeft}s`;
+
+  timer = setInterval(() => {
+    timeLeft--;
+    timerElement.innerText = `⏳ Time left: ${timeLeft}s`;
+
+    if (timeLeft <= 0) {
       clearInterval(timer);
-      timeLeft = 10;
-      timerEl.innerText = `⏳ ${timeLeft}s`;
-      timer = setInterval(() => {
-        timeLeft--;
-        timerEl.innerText = `⏳ ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          checkAnswer("", shuffledQuestions[currentQuestion].a); // Auto wrong
-        }
-      }, 1000);
+      handleTimeout(correctAnswer);
     }
+  }, 1000);
+}
 
-    function showQuestion() {
-      if (currentQuestion >= shuffledQuestions.length) {
-        endGame();
-        return;
+function handleTimeout(correctAnswer) {
+  const optionButtons = document.querySelectorAll(".options button");
+  optionButtons.forEach(b => {
+    b.disabled = true;
+    if (b.innerText === correctAnswer) {
+      b.classList.add("correctAnswer");
+    }
+  });
+
+  streak = 0;
+  setTimeout(() => {
+    currentQuestion++;
+    showQuestion();
+  }, 1200);
+}
+
+function checkAnswer(selected, correct, btn) {
+  clearInterval(timer);
+
+  const optionButtons = document.querySelectorAll(".options button");
+
+  if (selected === correct) {
+    score++;
+    streak++;
+    document.getElementById("correctSound").play();
+    btn.classList.add("correctAnswer");
+
+    if (streak % 3 === 0) {
+      showStreakMessage("🔥 Hot Streak! You’re on fire!");
+    }
+  } else {
+    streak = 0;
+    document.getElementById("wrongSound").play();
+    btn.classList.add("wrongAnswer");
+
+    // highlight the real correct answer
+    optionButtons.forEach(b => {
+      if (b.innerText === correct) {
+        b.classList.add("correctAnswer");
       }
+    });
+  }
 
-      const qData = shuffledQuestions[currentQuestion];
-      const shuffledOptions = [...qData.o].sort(() => Math.random() - 0.5);
+  // disable all buttons so user can’t click multiple
+  optionButtons.forEach(b => b.disabled = true);
 
-      progressText.innerText = `Question ${currentQuestion + 1} of ${shuffledQuestions.length}`;
-      const progressPercent = ((currentQuestion) / shuffledQuestions.length) * 100;
-      progressFill.style.width = `${progressPercent}%`;
+  setTimeout(() => {
+    currentQuestion++;
+    showQuestion();
+  }, 1200);
+}
 
-      quizContainer.innerHTML = `
-        <h2>${qData.q}</h2>
-        <div class="options">
-          ${shuffledOptions.map(opt => `<button onclick="checkAnswer('${opt}', '${qData.a}', this)">${opt}</button>`).join("")}
-        </div>
-      `;
+function showStreakMessage(msg) {
+  const streakMsg = document.createElement("div");
+  streakMsg.innerText = msg;
+  streakMsg.style.marginTop = "10px";
+  streakMsg.style.fontSize = "18px";
+  streakMsg.style.color = "gold";
+  streakMsg.style.animation = "pop 0.5s ease-in-out";
+  quizContainer.appendChild(streakMsg);
 
-      startTimer();
-    }
+  setTimeout(() => streakMsg.remove(), 1500);
+}
 
-    function checkAnswer(selected, correct, btn) {
-      clearInterval(timer);
+function endGame() {
+  document.getElementById("endSound").play();
+  quizContainer.innerHTML = "";
+  progressText.classList.add("hidden");
+  progressBar.classList.add("hidden");
+  timerElement.classList.add("hidden");
+  resultContainer.classList.remove("hidden");
 
-      if (selected === correct) {
-        score++;
-        streak++;
-        document.getElementById("correctSound").play();
-        if (btn) btn.classList.add("correct");
+  let message = "";
+  let medal = "";
 
-        if (streak % 3 === 0) {
-          alert("🔥 Hot Streak! You’re on fire!");
-        }
-      } else {
-        streak = 0;
-        document.getElementById("wrongSound").play();
-        if (btn) btn.classList.add("wrong");
-      }
+  if (score >= 17) {
+    message = "You are Rihan’s Right Hand 🤝 – you know him better than himself!";
+    medal = "🏆 Gold Medal!";
+  } else if (score >= 14) {
+    message = "You know Rihan very well 😎 – almost like a best friend.";
+    medal = "🥈 Silver Medal!";
+  } else {
+    message = "Oops 😬 You don’t really know Rihan… maybe spend more time with him!";
+    medal = "🥉 Bronze Medal!";
+  }
 
-      setTimeout(() => {
-        currentQuestion++;
-        showQuestion();
-      }, 600);
-    }
+  resultContainer.innerHTML = `
+    <h2 class="score">Game Over! 🎉<br>Your score: ${score}/${quizData.length}</h2>
+    <p style="font-size:18px; margin-top:10px;">${message}</p>
+    <p style="font-size:20px; margin-top:10px;">${medal}</p>
+    <button onclick="startGame()">Play Again</button>
+  `;
+  progressFill.style.width = "0%";
+}
 
-    function endGame() {
-      document.getElementById("endSound").play();
-      quizContainer.innerHTML = "";
-      progressText.classList.add("hidden");
-      progressBar.classList.add("hidden");
-      timerEl.classList.add("hidden");
-      resultContainer.classList.remove("hidden");
-
-      let message = "";
-      let medal = "";
-
-      if (score >= 17) {
-        medal = "🏆";
-        message = "You know Rehan better than himself!";
-      } else if (score >= 14) {
-        medal = "🥈";
-        message = "You really know Rehan!";
-      } else {
-        medal = "🥉";
-        message = "You don't know Rehan that well.";
-      }
-
-      resultContainer.innerHTML = `<h2 class="score">Game Over! 🎉<br>Your score: ${score}/${quizData.length}<br>${medal} ${message}</h2>
-      <button onclick="startGame()">Play Again</button>`;
-      progressFill.style.width = "0%";
-    }
-  </script>
+startGame();
+</script>
 </body>
 </html>
