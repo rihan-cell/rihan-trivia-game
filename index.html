@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rihan Trivia Game</title>
+  <style>
+    :root{
+      --bg1:#0ea5e9;
+      --bg2:#8b5cf6;
+      --card:#0b1220;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#22c55e;
+      --danger:#ef4444;
+      --btn:#1f2937;
+      --btnHover:#111827;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 1200px at 10% 10%, rgba(255,255,255,0.06), transparent 40%),
+                  radial-gradient(900px 900px at 90% 30%, rgba(255,255,255,0.05), transparent 40%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;align-items:center;justify-content:center;padding:18px;
+    }
+    .app{
+      width:min(720px, 100%);
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      backdrop-filter: blur(10px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow:hidden;
+    }
+    .header{padding:18px 22px 10px}
+    .title{margin:0;font-size:24px;letter-spacing:.3px}
+    .subtitle{margin:6px 0 0;font-size:14px;color:var(--muted)}.progress{height:10px;background:rgba(255,255,255,0.12);margin:14px 22px;border-radius:999px;overflow:hidden;position:relative}
+.progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#34d399,#60a5fa);transition:width .5s ease}
+.content{padding:18px 22px 24px}
+
+.card{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:18px}
+
+.question{font-size:20px;margin:4px 0 14px;font-weight:700}
+
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:520px){.grid{grid-template-columns:1fr 1fr}}
+
+.btn{
+  width:100%;
+  background:var(--btn);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:16px;font-weight:600;letter-spacing:.2px;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition: transform .08s ease, background .2s ease, border-color .2s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+.btn:hover{background:var(--btnHover)}
+.btn:active{transform:scale(.98)}
+.btn.correct{border-color:rgba(34,197,94,.9); background:rgba(34,197,94,.15)}
+.btn.wrong{border-color:rgba(239,68,68,.9); background:rgba(239,68,68,.12)}
+.btn[disabled]{opacity:.7;cursor:not-allowed}
+
+.controls{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.pill{padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--text);font-weight:700;cursor:pointer}
+
+.stats{display:flex;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:13px}
+
+.hide{display:none}
+
+.fade-enter{opacity:0;transform:translateY(8px)}
+.fade-enter-active{opacity:1;transform:translateY(0);transition:opacity .28s ease, transform .28s ease}
+.pulse{animation:pulse 1.4s ease 2}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+
+.result{text-align:center;padding:28px 10px}
+.score{font-size:52px;font-weight:800;line-height:1;margin:8px 0}
+.score small{display:block;font-size:14px;color:var(--muted);font-weight:600}
+
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);padding:8px 12px;border-radius:999px;font-size:12px;color:var(--text)}
+
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.piece{position:absolute;width:10px;height:14px;opacity:0.9;top:-20px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="header">
+      <h1 class="title">How well do you know Rihan?</h1>
+      <p class="subtitle">Answer 20 questions. Sounds on. Good luck! 🔊</p>
+    </div>
+    <div class="progress" aria-label="Progress"><span id="bar"></span></div><div class="content">
+  <div id="quiz" class="card">
+    <div class="stats"><span id="progressText">Question 1 of 20</span><span id="scoreText">Score: 0</span></div>
+    <div id="qwrap" class="fade-enter">
+      <div id="question" class="question">Click Start to begin</div>
+      <div id="options" class="grid"></div>
+    </div>
+    <div class="controls">
+      <button id="startBtn" class="pill">▶ Start</button>
+      <button id="nextBtn" class="pill hide">Next ➜</button>
+      <button id="restartBtn" class="pill hide">↺ Play Again</button>
+    </div>
+  </div>
+
+  <div id="resultCard" class="card hide">
+    <div class="result">
+      <div class="badge">Quiz finished</div>
+      <div id="bigScore" class="score">0<small>out of 20</small></div>
+      <p class="subtitle" id="remark">Nice!</p>
+      <div class="controls">
+        <button id="playAgain" class="pill">↺ Play Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>  <div class="confetti" id="confetti"></div>  <script>
+    const QUESTIONS = [
+      { q: "What is Rihan's favourite food?", answers:["Pizza","Porotta Beef","Burger","Biryani"], correct:"Porotta Beef" },
+      { q: "What is Rihan's favourite place?", answers:["Dubai","Kuwait","London","Kerala"], correct:"Kuwait" },
+      { q: "What is Rihan's favourite subject?", answers:["Maths","History","Science","English"], correct:"Science" },
+      { q: "What is Rihan's favourite hobby?", answers:["Reading","Gaming","Football","Drawing"], correct:"Gaming" },
+      { q: "What is Rihan's favourite color?", answers:["Blue","Red","Green","Black"], correct:"Black" },
+      { q: "What sport does Rihan like the most?", answers:["Football","Cricket","Basketball","Tennis"], correct:"Football" },
+      { q: "What is Rihan's favourite movie genre?", answers:["Action","Comedy","Horror","Sci-Fi"], correct:"Sci-Fi" },
+      { q: "If Rihan could visit one country, which would it be?", answers:["Japan","USA","Maldives","Saudi Arabia"], correct:"Maldives" },
+      { q: "What is Rihan's favourite drink?", answers:["Water","Juice","Milkshake","Tea"], correct:"Water" },
+      { q: "Which device does Rihan use the most?", answers:["Laptop","iPad","Phone","Gaming Console"], correct:"Laptop" },
+      { q: "Rihan prefers…", answers:["Morning","Afternoon","Evening","Night"], correct:"Night" },
+      { q: "What is Rihan's dream job?", answers:["Scientist","Engineer","Gamer/Streamer","Doctor"], correct:"Scientist" },
+      { q: "What is Rihan's favourite ice cream flavour?", answers:["Chocolate","Vanilla","Strawberry","Mango"], correct:"Chocolate" },
+      { q: "What is Rihan's strongest subject?", answers:["Maths","Science","English","Social Studies"], correct:"Science" },
+      { q: "What type of games does Rihan enjoy most?", answers:["Shooting","Racing","Strategy","Adventure"], correct:"Shooting" },
+      { q: "Rihan's favourite snack is…", answers:["Chips","Popcorn","Biscuits","Nuts"], correct:"Nuts" },
+      { q: "Who is Rihan's favourite superhero?", answers:["Iron Man","Spider-Man","Batman","Superman"], correct:"Iron Man" },
+      { q: "Rihan prefers…", answers:["Mountains","Beaches","Cities","Villages"], correct:"Beaches" },
+      { q: "What kind of music does Rihan like most?", answers:["Pop","Rap","Classical","Rock"], correct:"Pop" },
+      { q: "What is Rihan's strongest skill?", answers:["Silver-tongued","Gaming","Problem-solving","Creativity"], correct:"Silver-tongued" }
+    ];
+
+    function shuffle(array){
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    const Sound = (() => {
+      let ctx;
+      const getCtx = () => (ctx ||= new (window.AudioContext || window.webkitAudioContext)());
+      function tone(freq=440, time=0.15, type='sine', gain=0.2){
+        const ac = getCtx();
+        const osc = ac.createOscillator();
+        const g = ac.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(gain, ac.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + time);
+        osc.connect(g).connect(ac.destination);
+        osc.start(); osc.stop(ac.currentTime + time + 0.05);
+      }
+      function chord(freqs=[440,554,659], time=0.4){ freqs.forEach((f,i)=>tone(f, time-(i*0.05), ['triangle','sine','square'][i%3], 0.15)); }
+      function noise(duration=0.35, startGain=0.35){
+        const ac = getCtx();
+        const buffer = ac.createBuffer(1, ac.sampleRate * duration, ac.sampleRate);
+        const data = buffer.getChannelData(0);
+        for(let i=0;i<data.length;i++){ data[i] = (Math.random()*2-1); }
+        const src = ac.createBufferSource(); src.buffer = buffer;
+        const g = ac.createGain();
+        g.gain.setValueAtTime(0.0001, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(startGain, ac.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + duration);
+        src.connect(g).connect(ac.destination); src.start();
+      }
+      return {
+        correct(){ tone(700,0.11,'sine',0.18); setTimeout(()=>tone(980,0.16,'sine',0.18),90); },
+        wrong(){ tone(220,0.18,'sawtooth',0.14); setTimeout(()=>tone(160,0.22,'square',0.12),120); noise(0.22,0.25); },
+        applause(){ chord([523,659,784],0.5); setTimeout(()=>chord([659,784,988],0.5),180); for(let i=0;i<26;i++){ setTimeout(()=>noise(0.18,0.2), i*40); }
+        },
+        unlock(){ getCtx().resume?.(); }
+      };
+    })();
+
+    function throwConfetti(){
+      const root = document.getElementById('confetti');
+      root.innerHTML = '';
+      const colors = ['#34d399','#60a5fa','#f472b6','#fbbf24','#a78bfa','#fecaca'];
+      const count = 120;
+      for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className = 'piece';
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDuration = (0.9 + Math.random()*1.8) + 's';
+        el.style.transform = `rotate(${Math.random()*360}deg)`;
+        root.appendChild(el);
+      }
+      setTimeout(()=>root.innerHTML='', 3000);
+    }
+
+    const els = {
+      bar: document.getElementById('bar'),
+      progressText: document.getElementById('progressText'),
+      scoreText: document.getElementById('scoreText'),
+      question: document.getElementById('question'),
+      options: document.getElementById('options'),
+      nextBtn: document.getElementById('nextBtn'),
+      startBtn: document.getElementById('startBtn'),
+      restartBtn: document.getElementById('restartBtn'),
+      resultCard: document.getElementById('resultCard'),
+      quiz: document.getElementById('quiz'),
+      bigScore: document.getElementById('bigScore'),
+      remark: document.getElementById('remark'),
+      playAgain: document.getElementById('playAgain'),
+      qwrap: document.getElementById('qwrap'),
+    };
+
+    let current = 0, score = 0, locked = false, qset = [];
+
+    function startGame(){
+      current = 0; score = 0; locked = false;
+      qset = shuffle([...QUESTIONS]);
+      els.startBtn.classList.add('hide');
+      els.restartBtn.classList.add('hide');
+      els.resultCard.classList.add('hide');
+      els.quiz.classList.remove('hide');
+      els.scoreText.textContent = 'Score: 0';
+      updateProgress();
+      renderQuestion();
+      Sound.unlock();
+    }
+
+    function renderQuestion(){
+      const { q, answers } = qset[current];
+      els.qwrap.classList.remove('fade-enter-active');
+      void els.qwrap.offsetWidth;
+      els.qwrap.classList.add('fade-enter');
+      setTimeout(()=>els.qwrap.classList.add('fade-enter-active'));
+
+      els.question.textContent = q;
+      els.options.innerHTML = '';
+      answers.forEach(text => {
+        const b = document.createElement('button');
+        b.className = 'btn';
+        b.textContent = text;
+        b.addEventListener('click', () => selectAnswer(b, text));
+        els.options
