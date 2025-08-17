@@ -60,7 +60,6 @@
       0% { transform: scale(0.5); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-    /* Loading screen */
     #loading {
       display: none;
       font-size: 20px;
@@ -72,12 +71,10 @@
       50% { opacity: 0.5; }
       100% { opacity: 1; }
     }
-    /* Progress text */
     #progress {
       font-size: 16px;
       margin-bottom: 10px;
     }
-    /* Progress bar */
     .progress-bar {
       width: 100%;
       background: rgba(255,255,255,0.2);
@@ -118,24 +115,24 @@
     const quizData = [
       { q: "What is Rihan's favourite food?", a: "Porotta Beef", o: ["Porotta Beef", "Pizza", "Burger", "Shawarma"] },
       { q: "What is Rihan's favourite place?", a: "Kuwait", o: ["Kuwait", "Dubai", "Maldives", "Qatar"] },
-      { q: "What is Rihan's nickname?", a: "Max", o: ["Max", "Rizu", "Ree", "RJ"] },
       { q: "What is Rihan's favourite hobby?", a: "Gaming", o: ["Gaming", "Drawing", "Reading", "Traveling"] },
       { q: "What is Rihan's favourite colour?", a: "Black", o: ["Black", "Blue", "Red", "Green"] },
       { q: "What is Rihan's favourite sport?", a: "Football", o: ["Football", "Cricket", "Basketball", "Badminton"] },
       { q: "What is Rihan's favourite movie genre?", a: "Sci-Fi", o: ["Sci-Fi", "Comedy", "Horror", "Drama"] },
       { q: "What is Rihan's dream travel destination?", a: "Maldives", o: ["Maldives", "Paris", "New York", "London"] },
       { q: "What is Rihan's favourite drink?", a: "Water", o: ["Water", "Juice", "Coffee", "Tea"] },
-      { q: "What device does Rihan prefer?", a: "Laptop", o: ["Laptop", "Phone", "Tablet", "Console"] },
-      { q: "What time of day does Rihan like most?", a: "Night", o: ["Night", "Morning", "Afternoon", "Evening"] },
-      { q: "What does Rihan want to be in the future?", a: "Scientist", o: ["Scientist", "Doctor", "Engineer", "Pilot"] },
-      { q: "What is Rihan's favourite sweet?", a: "Chocolate", o: ["Chocolate", "Cake", "Ice cream", "Donut"] },
-      { q: "What is Rihan's favourite subject?", a: "Science", o: ["Science", "Maths", "English", "History"] },
-      { q: "What is Rihan's favourite type of game?", a: "Shooting", o: ["Shooting", "Racing", "Puzzle", "Adventure"] },
-      { q: "What is Rihan best at in sports?", a: "Nets", o: ["Nets", "Running", "Passing", "Defending"] },
+      { q: "What device does Rihan use the most?", a: "Laptop", o: ["Laptop", "Phone", "Tablet", "Console"] },
+      { q: "What is Rihan's favourite time of day?", a: "Night", o: ["Night", "Morning", "Afternoon", "Evening"] },
+      { q: "What does Rihan want to become in the future?", a: "Scientist", o: ["Scientist", "Doctor", "Engineer", "Pilot"] },
+      { q: "What is Rihan's favourite ice cream flavour?", a: "Chocolate", o: ["Chocolate", "Vanilla", "Strawberry", "Mango"] },
+      { q: "What is Rihan's favourite school subject?", a: "Science", o: ["Science", "Maths", "English", "History"] },
+      { q: "What is Rihan's favourite video game genre?", a: "Shooting", o: ["Shooting", "Racing", "Puzzle", "Adventure"] },
       { q: "Who is Rihan's favourite superhero?", a: "Iron Man", o: ["Iron Man", "Spider-Man", "Batman", "Superman"] },
       { q: "What is Rihan's favourite music genre?", a: "Pop", o: ["Pop", "Rock", "Hip-Hop", "Classical"] },
       { q: "What is Rihan's strongest skill?", a: "Silver-tongued", o: ["Silver-tongued", "Fast Learner", "Creative", "Hardworking"] },
-      { q: "What is Rihan's favourite type of induction?", a: "Inductions", o: ["Inductions", "Motors", "Physics", "Experiments"] }
+      { q: "What is Rihan most afraid of?", a: "His father and mother", o: ["Darkness", "His father and mother", "Heights", "Exams"] },
+      { q: "Which subject does Rihan find the hardest in school?", a: "No subject", o: ["Maths", "English", "Science", "No subject"] },
+      { q: "If Rihan could instantly learn one skill, what would it be?", a: "Manipulation", o: ["Manipulation", "Cooking", "Singing", "Drawing"] }
     ];
 
     let currentQuestion = 0;
