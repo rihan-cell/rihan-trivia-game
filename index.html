@@ -89,6 +89,26 @@
       background: linear-gradient(90deg, #ff9800, #ffc107);
       transition: width 0.4s ease;
     }
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    /* Animations */
+    .correct {
+      animation: bounce 0.5s;
+    }
+    .wrong {
+      animation: shake 0.5s;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
   </style>
 </head>
 <body>
@@ -98,6 +118,7 @@
     <div class="progress-bar hidden" id="progressBar">
       <div class="progress-fill" id="progressFill"></div>
     </div>
+    <div id="timer" class="hidden">⏳ 10s</div>
     <div id="quiz">
       <button id="startBtn">Start Game</button>
     </div>
@@ -137,7 +158,10 @@
 
     let currentQuestion = 0;
     let score = 0;
+    let streak = 0;
     let shuffledQuestions = [];
+    let timer;
+    let timeLeft = 10;
 
     const quizContainer = document.getElementById("quiz");
     const resultContainer = document.getElementById("result");
@@ -146,6 +170,7 @@
     const progressText = document.getElementById("progress");
     const progressBar = document.getElementById("progressBar");
     const progressFill = document.getElementById("progressFill");
+    const timerEl = document.getElementById("timer");
 
     startBtn.addEventListener("click", startGame);
 
@@ -153,20 +178,37 @@
       document.getElementById("startSound").play();
       currentQuestion = 0;
       score = 0;
+      streak = 0;
       shuffledQuestions = quizData.sort(() => Math.random() - 0.5);
 
       quizContainer.classList.add("hidden");
       loading.style.display = "block";
       progressText.classList.add("hidden");
       progressBar.classList.add("hidden");
+      timerEl.classList.add("hidden");
 
       setTimeout(() => {
         loading.style.display = "none";
         quizContainer.classList.remove("hidden");
         progressText.classList.remove("hidden");
         progressBar.classList.remove("hidden");
+        timerEl.classList.remove("hidden");
         showQuestion();
       }, 2000);
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 10;
+      timerEl.innerText = `⏳ ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.innerText = `⏳ ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          checkAnswer("", shuffledQuestions[currentQuestion].a); // Auto wrong
+        }
+      }, 1000);
     }
 
     function showQuestion() {
@@ -185,20 +227,35 @@
       quizContainer.innerHTML = `
         <h2>${qData.q}</h2>
         <div class="options">
-          ${shuffledOptions.map(opt => `<button onclick="checkAnswer('${opt}', '${qData.a}')">${opt}</button>`).join("")}
+          ${shuffledOptions.map(opt => `<button onclick="checkAnswer('${opt}', '${qData.a}', this)">${opt}</button>`).join("")}
         </div>
       `;
+
+      startTimer();
     }
 
-    function checkAnswer(selected, correct) {
+    function checkAnswer(selected, correct, btn) {
+      clearInterval(timer);
+
       if (selected === correct) {
         score++;
+        streak++;
         document.getElementById("correctSound").play();
+        if (btn) btn.classList.add("correct");
+
+        if (streak % 3 === 0) {
+          alert("🔥 Hot Streak! You’re on fire!");
+        }
       } else {
+        streak = 0;
         document.getElementById("wrongSound").play();
+        if (btn) btn.classList.add("wrong");
       }
-      currentQuestion++;
-      showQuestion();
+
+      setTimeout(() => {
+        currentQuestion++;
+        showQuestion();
+      }, 600);
     }
 
     function endGame() {
@@ -206,8 +263,24 @@
       quizContainer.innerHTML = "";
       progressText.classList.add("hidden");
       progressBar.classList.add("hidden");
+      timerEl.classList.add("hidden");
       resultContainer.classList.remove("hidden");
-      resultContainer.innerHTML = `<h2 class="score">Game Over! 🎉<br>Your score: ${score}/${quizData.length}</h2>
+
+      let message = "";
+      let medal = "";
+
+      if (score >= 17) {
+        medal = "🏆";
+        message = "You know Rehan better than himself!";
+      } else if (score >= 14) {
+        medal = "🥈";
+        message = "You really know Rehan!";
+      } else {
+        medal = "🥉";
+        message = "You don't know Rehan that well.";
+      }
+
+      resultContainer.innerHTML = `<h2 class="score">Game Over! 🎉<br>Your score: ${score}/${quizData.length}<br>${medal} ${message}</h2>
       <button onclick="startGame()">Play Again</button>`;
       progressFill.style.width = "0%";
     }
